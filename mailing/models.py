@@ -1,17 +1,35 @@
+import datetime
+
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
-class MailingRecipient(models.Model):
-    email = models.EmailField(verbose_name='Email', help_text='Укажите email')
-    last_name = models.CharField(max_length=50,verbose_name='Фамилия', help_text='Введите фамилию')
-    first_name = models.CharField(max_length=50,verbose_name='Имя', help_text='Введите имя')
-    middle_name = models.CharField(max_length=50, blank=True, null=True, verbose_name='Отчество', help_text='Введите отчество')
-    comment = models.TextField(verbose_name='комментарий', blank=True, null=True, help_text='Введите комментарий')
+class Recipient(models.Model):
+    email = models.EmailField(verbose_name="Email", help_text="Укажите email")
+    last_name = models.CharField(
+        max_length=50, verbose_name="Фамилия", help_text="Введите фамилию"
+    )
+    first_name = models.CharField(
+        max_length=50, verbose_name="Имя", help_text="Введите имя"
+    )
+    middle_name = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Отчество",
+        help_text="Введите отчество",
+    )
+    comment = models.TextField(
+        verbose_name="комментарий",
+        blank=True,
+        null=True,
+        help_text="Введите комментарий",
+    )
 
     class Meta:
-        verbose_name = 'Получатель рассылки'
-        verbose_name_plural = 'Получатели рассылки'
-        ordering = ('email',)
+        verbose_name = "Получатель рассылки"
+        verbose_name_plural = "Получатели рассылки"
+        ordering = ("email",)
         # permissions = [
         #     ('can_unpublish_product', 'Can unpublish product')
         # ]
@@ -19,14 +37,19 @@ class MailingRecipient(models.Model):
     def __str__(self):
         return self.email
 
+
 class Message(models.Model):
-    title = models.CharField(max_length=50, verbose_name='Тема письма', help_text='Введите тему письма')
-    text = models.TextField(verbose_name='текст письма', help_text='Введите текст письма')
+    title = models.CharField(
+        max_length=50, verbose_name="Тема письма", help_text="Введите тему письма"
+    )
+    text = models.TextField(
+        verbose_name="текст письма", help_text="Введите текст письма"
+    )
 
     class Meta:
-        verbose_name = 'Сообщение'
-        verbose_name_plural = 'Сообщения'
-        ordering = ('title',)
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
+        ordering = ("title",)
         # permissions = [
         #     ('can_unpublish_product', 'Can unpublish product')
         # ]
@@ -34,19 +57,71 @@ class Message(models.Model):
     def __str__(self):
         return self.title
 
+
 class Mailing(models.Model):
-    CREATED = 'created'
-    RUN = 'run'
-    FINISHED = 'finished'
 
     STATUS_CHOICES = [
-        (CREATED, 'Создана'),
-        (RUN, 'Запущена'),
-        (FINISHED, 'Завершена'),
+        ("CREATED", "Создана"),
+        ("RUN", "Запущена"),
+        ("FINISHED", "Завершена"),
     ]
 
-    start_time = models.DateTimeField(verbose_name='Начало рассылки', help_text='Введите дату и время начала рассылки')
-    end_time = models.DateTimeField(verbose_name='Конец рассылки', help_text='Введите дату и время конца рассылки')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name='Статус рассылки')
-    message = models.ForeignKey("Message", on_delete=models.CASCADE, related_name='messages', verbose_name='сообщение')
-    recipients = models.ManyToManyField(MailingRecipient)
+    name = models.CharField('Название', max_length=200)
+    start_time = models.DateTimeField(
+        verbose_name="Начало рассылки", help_text="Введите дату и время начала рассылки"
+    )
+    end_time = models.DateTimeField(
+        verbose_name="Конец рассылки", help_text="Введите дату и время конца рассылки"
+    )
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, verbose_name="Статус рассылки"
+    )
+    message = models.ForeignKey(
+        "Message",
+        on_delete=models.CASCADE,
+        related_name="messages",
+        verbose_name="сообщение",
+    )
+    recipients = models.ManyToManyField(Recipient)
+
+    def update_status(self):
+
+        """Метод обновления статуса"""
+
+        now_time = datetime.datetime.now()
+        old_status = self.status
+
+        if self.start_time < now_time:
+            new_status = "CREATED"
+
+        elif now_time <= self.start_time < self.end_time:
+            new_status = "RUN"
+
+        elif now_time >= self.end_time:
+            new_status = "FINISHED"
+
+        else:
+            new_status = self.status
+
+        if old_status != new_status:
+            self.status = new_status
+
+        self.save()
+
+        return self.status
+
+    def clean(self):
+        """Валидация: дата окончания не может быть раньше даты начала и дата начала не может быть в прошлом"""
+
+        if self.end_time and self.start_time and self.end_time <= self.start_time:
+            raise ValidationError({'end_date': 'Дата окончания должна быть позже даты начала'})
+
+        if self.start_time and self.start_time < datetime.datetime.now():
+            raise ValidationError({'end_date': 'Дата начала не может быть в прошлом'})
+
+    def __str__(self):
+        return f'{self.name} - {self.status}'
+
+
+
+
