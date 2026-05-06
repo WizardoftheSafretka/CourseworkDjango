@@ -1,6 +1,5 @@
 {% extends "mailing/base.html" %}
 {% block content %}
-{% load my_tags %}
 <div class="row text-center">
         <div class="col-3">
             <div class="card mb-4 box-shadow">
@@ -21,7 +20,7 @@
 <!--                    </form>-->
 <!--                    {% endif %}-->
                     <div class="btn-group">
-                    <a class="btn btn-primary" href="{% url 'catalog:home' %}" role='button'>Назад</a>
+                    <a class="btn btn-primary" href="{% url 'mailing:recipient_list' %}" role='button'>Назад</a>
                     </div>
                 </div>
             </div>

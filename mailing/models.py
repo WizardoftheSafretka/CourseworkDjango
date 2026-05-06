@@ -2,6 +2,7 @@ import datetime
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class Recipient(models.Model):
@@ -68,7 +69,7 @@ class Mailing(models.Model):
 
     name = models.CharField('Название', max_length=200)
     start_time = models.DateTimeField(
-        verbose_name="Начало рассылки", help_text="Введите дату и время начала рассылки"
+        verbose_name="Начало рассылки", help_text="Введите дату и время начала рассылки",
     )
     end_time = models.DateTimeField(
         verbose_name="Конец рассылки", help_text="Введите дату и время конца рассылки"
@@ -88,10 +89,10 @@ class Mailing(models.Model):
 
         """Метод обновления статуса"""
 
-        now_time = datetime.datetime.now()
+        now_time = timezone.now()
         old_status = self.status
 
-        if self.start_time < now_time:
+        if now_time < self.start_time:
             new_status = "CREATED"
 
         elif now_time <= self.start_time < self.end_time:
@@ -110,14 +111,7 @@ class Mailing(models.Model):
 
         return self.status
 
-    def clean(self):
-        """Валидация: дата окончания не может быть раньше даты начала и дата начала не может быть в прошлом"""
 
-        if self.end_time and self.start_time and self.end_time <= self.start_time:
-            raise ValidationError({'end_date': 'Дата окончания должна быть позже даты начала'})
-
-        if self.start_time and self.start_time < datetime.datetime.now():
-            raise ValidationError({'end_date': 'Дата начала не может быть в прошлом'})
 
     def __str__(self):
         return f'{self.name} - {self.status}'

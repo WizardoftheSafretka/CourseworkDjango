@@ -1,26 +1,25 @@
 {% extends "mailing/base.html" %}
 {% block content %}
 <div class="row text-center">
-        {% for recipient in object_list %}
+        {% for message in object_list %}
         <div class="col-3">
             <div class="card mb-4 box-shadow">
                 <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">{{recipient.email}}</h4>
+                    <h4 class="my-0 font-weight-normal">{{message.title}}</h4>
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled mt-3 mb-4 text-start m-3">
-                        <li>Фамилия: {{recipient.last_name}}</li>
-                        <li>Имя: {{recipient.first_name}}</li>
+                        <li>Текст: {{message.text | truncatechars:100}}</li>
                     </ul>
                     <div class="btn-group d-flex flex-wrap gap-1 w-100">
                         <a class="btn btn-primary flex-fill text-truncate"
-                        href="{% url 'mailing:recipient_detail' recipient.pk %}"
+                        href="{% url 'mailing:message_detail' message.pk %}"
                         role='button'>Подробнее</a>
                         <a class="btn btn-primary flex-fill text-truncate"
-                        href="{% url 'mailing:recipient_update' recipient.pk %}"
+                        href="{% url 'mailing:message_update' message.pk %}"
                         role='button'>Редактировать</a>
                         <a class="btn btn-primary flex-fill text-truncate"
-                        href="{% url 'mailing:recipient_delete' recipient.pk %}"
+                        href="{% url 'mailing:message_delete' message.pk %}"
                         role='button'>Удалить</a>
                     </div>
                 </div>
