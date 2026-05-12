@@ -31,9 +31,6 @@ class Recipient(models.Model):
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
         ordering = ("email",)
-        # permissions = [
-        #     ('can_unpublish_product', 'Can unpublish product')
-        # ]
 
     def __str__(self):
         return self.email
@@ -67,7 +64,7 @@ class Mailing(models.Model):
         ("FINISHED", "Завершена"),
     ]
 
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField('Название', max_length=200, help_text="Введите название рассылки")
     start_time = models.DateTimeField(
         verbose_name="Начало рассылки", help_text="Введите дату и время начала рассылки",
     )
@@ -116,6 +113,45 @@ class Mailing(models.Model):
     def __str__(self):
         return f'{self.name} - {self.status}'
 
+
+class AttemptMailing(models.Model):
+    """Модель попытки рассылки"""
+
+    class Status(models.TextChoices):
+        SUCCESS = 'success', 'Успешно'
+        FAILED = 'failed', 'Не успешно'
+
+    attempt_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='время попытки'
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.FAILED,
+        verbose_name='статус'
+    )
+    server_response = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='ответ почтового сервера'
+    )
+    mailing = models.ForeignKey(
+        "Mailing",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='attempts',
+        verbose_name='рассылка'
+    )
+
+    class Meta:
+        verbose_name = 'попытка'
+        verbose_name_plural = 'попытки'
+        ordering = ['-attempt_time', 'status']
+
+    def __str__(self):
+        return f"Попытка от {self.attempt_time.strftime('%Y-%m-%d %H:%M:%S')} - {self.get_status_display()}"
 
 
 
