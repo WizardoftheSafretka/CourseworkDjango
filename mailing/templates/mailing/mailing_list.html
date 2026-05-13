@@ -10,17 +10,22 @@
                 <div class="card-body">
                     <ul class="list-unstyled mt-3 mb-4 text-start m-3">
                         <li>Статус: {{mailing.status}}</li>
+                        {% if user.is_manager %}
+                        <li>Владелец: {{mailing.owner.username}}</li>
+                        {% endif %}
                     </ul>
                     <div class="btn-group d-flex flex-wrap gap-1 w-100">
                         <a class="btn btn-primary flex-fill text-truncate"
                         href="{% url 'mailing:mailing_detail' mailing.pk %}"
                         role='button'>Подробнее</a>
+                        {% if mailing.can_be_edited_by user %}
                         <a class="btn btn-primary flex-fill text-truncate"
                         href="{% url 'mailing:mailing_update' mailing.pk %}"
                         role='button'>Редактировать</a>
                         <a class="btn btn-primary flex-fill text-truncate"
                         href="{% url 'mailing:mailing_delete' mailing.pk %}"
                         role='button'>Удалить</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

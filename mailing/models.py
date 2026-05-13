@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
+from users.models import User
+
 
 class Recipient(models.Model):
     email = models.EmailField(verbose_name="Email", help_text="Укажите email")
@@ -26,11 +28,18 @@ class Recipient(models.Model):
         null=True,
         help_text="Введите комментарий",
     )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipients',
+        verbose_name='владелец'
+    )
 
     class Meta:
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
-        ordering = ("email",)
+        unique_together = ['email', 'owner']
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.email
@@ -62,6 +71,7 @@ class Mailing(models.Model):
         ("CREATED", "Создана"),
         ("RUN", "Запущена"),
         ("FINISHED", "Завершена"),
+        ('turned-off', 'Отключена'),
     ]
 
     name = models.CharField('Название', max_length=200, help_text="Введите название рассылки")
@@ -82,8 +92,49 @@ class Mailing(models.Model):
     )
     recipients = models.ManyToManyField(Recipient)
 
-    def update_status(self):
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='mailings',
+        verbose_name='владелец'
+    )
+    disabled_by_manager = models.BooleanField(default=False, verbose_name='отключена менеджером')
 
+    class Meta:
+        verbose_name = 'рассылка'
+        verbose_name_plural = 'рассылки'
+        ordering = ['-created_at']
+        permissions = [
+            ("view_all_mailings", "Может просматривать все рассылки"),
+            ("disable_mailings", "Может отключать рассылки"),
+        ]
+
+
+    def can_be_edited_by(self, user):
+        """Проверка, может ли пользователь редактировать рассылку"""
+
+        if user.is_manager or user.is_superuser:
+            return not self.disabled_by_manager
+        return self.owner == user and not self.disabled_by_manager
+
+
+    def disable_by_manager(self):
+        """Отключение рассылки менеджером"""
+
+        self.disabled_by_manager = True
+        self.status = 'turned-off'
+        self.save()
+
+
+    def enable_by_manager(self):
+        """Включение рассылки менеджером"""
+
+        self.disabled_by_manager = False
+        if self.status == 'turned-off':
+            self.status = 'created'
+        self.save()
+
+    def update_status(self):
         """Метод обновления статуса"""
 
         now_time = timezone.now()

@@ -13,9 +13,11 @@
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
     <h1 class="display-4">SkyMailing</h1>
     <p class="lead">SkyMailing - это отличный вариант создания рассылок</p>
+    {% if not user.is_manager %}
     <p> <a class="btn btn-primary" href="{% url 'mailing:recipient_create' %}" role='button'>Создать получателя</a> </p>
     <p> <a class="btn btn-primary" href="{% url 'mailing:message_create' %}" role='button'>Создать сообщение</a> </p>
     <p> <a class="btn btn-primary" href="{% url 'mailing:mailing_create' %}" role='button'>Создать рассылку</a> </p>
+    {% endif %}
 </div>
 
     {% block content %}

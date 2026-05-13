@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -6,27 +7,28 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.views.generic.base import ContextMixin, TemplateView
 
 from mailing.forms import RecipientForm, MessageForm, MailingForm
+from mailing.mixins import UserNotBlockedMixin, OwnerOrManagerMixin, OwnerQuerysetMixin
 from mailing.models import Recipient, Message, Mailing, AttemptMailing
 from mailing.services import sending_mail
 
 
-class RecipientListView(ListView):
+class RecipientListView(LoginRequiredMixin, UserNotBlockedMixin, OwnerQuerysetMixin, ListView):
     model = Recipient
     context_object_name = "recipients"
 
 
-class RecipientDetailView(DetailView):
+class RecipientDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Recipient
 
 
-class RecipientCreateView(CreateView):
+class RecipientCreateView(LoginRequiredMixin, UserNotBlockedMixin, CreateView):
     model = Recipient
     form_class = RecipientForm
     success_url = reverse_lazy("mailing:recipient_list")
 
 
 
-class RecipientUpdateView(UpdateView):
+class RecipientUpdateView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, UpdateView):
     model = Recipient
     form_class = RecipientForm
     success_url = reverse_lazy("mailing:recipient_list")
@@ -35,30 +37,30 @@ class RecipientUpdateView(UpdateView):
         return reverse("mailing:recipient_detail", args=[self.kwargs.get("pk")])
 
 
-class RecipientDeleteView(DeleteView):
+class RecipientDeleteView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DeleteView):
     model = Recipient
     success_url = reverse_lazy("mailing:recipient_list")
 
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, UserNotBlockedMixin, ListView):
     model = Message
     context_object_name = "messages"
 
 
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Message
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, UserNotBlockedMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("mailing:message_list")
 
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, UpdateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("mailing:message_list")
@@ -67,16 +69,16 @@ class MessageUpdateView(UpdateView):
         return reverse("mailing:message_detail", args=[self.kwargs.get("pk")])
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DeleteView):
     model = Message
     success_url = reverse_lazy("mailing:message_list")
 
 
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, UserNotBlockedMixin, ListView):
     model = Mailing
     context_object_name = "mailings"
 
-class MailingDetailView(DetailView):
+class MailingDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Mailing
 
     def get_object(self, queryset=None):
@@ -125,13 +127,13 @@ class MailingDetailView(DetailView):
 
         return redirect(reverse('mailing_detail', kwargs={'pk': mailing.pk}))
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, UserNotBlockedMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy("mailing:mailing_list")
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy("mailing:mailing_list")
@@ -140,7 +142,7 @@ class MailingUpdateView(UpdateView):
         return reverse("mailing:mailing_detail", args=[self.kwargs.get("pk")])
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DeleteView):
     model = Mailing
     success_url = reverse_lazy("mailing:mailing_list")
 
