@@ -32,14 +32,15 @@ class Recipient(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='recipients',
-        verbose_name='владелец'
+        verbose_name='владелец',
+        blank=True,
+        null=True,
     )
 
     class Meta:
         verbose_name = "Получатель рассылки"
         verbose_name_plural = "Получатели рассылки"
         unique_together = ['email', 'owner']
-        ordering = ['-created_at']
 
     def __str__(self):
         return self.email
@@ -51,6 +52,14 @@ class Message(models.Model):
     )
     text = models.TextField(
         verbose_name="текст письма", help_text="Введите текст письма"
+    )
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name='сообщения',
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -96,26 +105,19 @@ class Mailing(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='mailings',
-        verbose_name='владелец'
+        verbose_name='владелец',
+        blank=True,
+        null=True,
     )
     disabled_by_manager = models.BooleanField(default=False, verbose_name='отключена менеджером')
 
     class Meta:
         verbose_name = 'рассылка'
         verbose_name_plural = 'рассылки'
-        ordering = ['-created_at']
         permissions = [
             ("view_all_mailings", "Может просматривать все рассылки"),
             ("disable_mailings", "Может отключать рассылки"),
         ]
-
-
-    def can_be_edited_by(self, user):
-        """Проверка, может ли пользователь редактировать рассылку"""
-
-        if user.is_manager or user.is_superuser:
-            return not self.disabled_by_manager
-        return self.owner == user and not self.disabled_by_manager
 
 
     def disable_by_manager(self):

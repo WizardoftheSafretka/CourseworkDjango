@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.generic.base import ContextMixin, TemplateView
-
 from mailing.forms import RecipientForm, MessageForm, MailingForm
 from mailing.mixins import UserNotBlockedMixin, OwnerOrManagerMixin, OwnerQuerysetMixin
 from mailing.models import Recipient, Message, Mailing, AttemptMailing
@@ -16,7 +18,14 @@ class RecipientListView(LoginRequiredMixin, UserNotBlockedMixin, OwnerQuerysetMi
     model = Recipient
     context_object_name = "recipients"
 
+    def get_queryset(self):
+        queryset = cache.get('my_queryset')
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set('my_queryset', queryset, 60 * 15)  # Кешируем данные на 15 минут
+        return queryset
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class RecipientDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Recipient
 
@@ -46,9 +55,14 @@ class MessageListView(LoginRequiredMixin, UserNotBlockedMixin, ListView):
     model = Message
     context_object_name = "messages"
 
+    def get_queryset(self):
+        queryset = cache.get('my_queryset')
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set('my_queryset', queryset, 60 * 15)  # Кешируем данные на 15 минут
+        return queryset
 
-
-
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class MessageDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Message
 
@@ -78,6 +92,14 @@ class MailingListView(LoginRequiredMixin, UserNotBlockedMixin, ListView):
     model = Mailing
     context_object_name = "mailings"
 
+    def get_queryset(self):
+        queryset = cache.get('my_queryset')
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set('my_queryset', queryset, 60 * 15)  # Кешируем данные на 15 минут
+        return queryset
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class MailingDetailView(LoginRequiredMixin, UserNotBlockedMixin, OwnerOrManagerMixin, DetailView):
     model = Mailing
 
@@ -151,8 +173,8 @@ class AttemptMailingListView(ListView):
     context_object_name = "attempts"
 
 
-class MainView(ContextMixin, TemplateView):
-    template_name = 'main.html'
+class MainView(TemplateView):
+    template_name = 'mailing/main.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

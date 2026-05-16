@@ -18,7 +18,7 @@
                         <a class="btn btn-primary flex-fill text-truncate"
                         href="{% url 'mailing:mailing_detail' mailing.pk %}"
                         role='button'>Подробнее</a>
-                        {% if mailing.can_be_edited_by user %}
+                        {% if user == mailing.owner or user.is_manager %}
                         <a class="btn btn-primary flex-fill text-truncate"
                         href="{% url 'mailing:mailing_update' mailing.pk %}"
                         role='button'>Редактировать</a>

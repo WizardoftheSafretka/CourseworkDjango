@@ -1,10 +1,13 @@
 import secrets
 
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView
 from django.contrib import messages
 
@@ -110,3 +113,17 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
         context = super().get_context_data(**kwargs)
         context['login_url'] = reverse_lazy('login')
         return context
+
+
+@csrf_exempt
+def custom_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('mailing/main.html')
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'mailing/login.html', {'form': form})
