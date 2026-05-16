@@ -1,0 +1,12 @@
+{% extends "mailing/base.html" %}
+{% block content %}
+<div class="row text-center">
+                <div>
+                    <ul class="list-unstyled mt-3 mb-4 text-start m-3">
+						<li>Общее количество всех созданных рассылок: {{total_mailings}}</li>
+                        <li>Количество активных рассылок: {{active_mailings}}</li>
+                        <li>Количество уникальных получателей: {{unique_recipients}}</li>
+                    </ul>
+                </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "mailing/base.html" %}
+{% block content %}
+<div class="row text-center">
+        {% for attemptmailing in object_list %}
+        <div class="col-3">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{attemptmailing.mailing.name}}</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mt-3 mb-4 text-start m-3">
+                        <li>Статус: {{attemptmailing.status}}</li>
+                        <li>Время попытки: {{attemptmailing.attempt_time}}</li>
+                        <li>Ответ сервера: {{attemptmailing.server_response}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

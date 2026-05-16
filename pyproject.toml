@@ -5,12 +5,38 @@ description = ""
 authors = [
     {name = "Wizard",email = "merihov@yandex.ru"}
 ]
+package-mode = false
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "django (>=6.0.4,<7.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "django-phonenumber-field (>=8.4.0,<9.0.0)",
+    "django-phonenumbers (>=1.0.1,<2.0.0)",
+    "redis (>=7.4.0,<8.0.0)",
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+lint = [
+    "flake8 (>=7.3.0,<8.0.0)",
+    "black (>=26.3.1,<27.0.0)",
+    "isort (>=8.0.1,<9.0.0)"
+]
+
+[flake8]
+max-line-length = 119
+ignore = "E203, W503"
+exclude = ".git, __pycache__, venv, .venv"
+
+[tool.black]
+target-version = ['py313']
+line-length = 89
+
+[tool.isort]
+line_length = 89

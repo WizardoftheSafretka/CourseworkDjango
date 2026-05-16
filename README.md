@@ -10,7 +10,7 @@
 
 1. Клонируйте репозиторий:
 ```
-git clone git@github.com:WizardoftheSafretka/DjangoProject.git
+https://github.com/WizardoftheSafretka/CourseworkDjango.git
 ```
 
 2. Установите зависимости:

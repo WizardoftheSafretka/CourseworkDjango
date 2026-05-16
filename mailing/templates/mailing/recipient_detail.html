@@ -1,0 +1,29 @@
+{% extends "mailing/base.html" %}
+{% block content %}
+<div class="row text-center">
+        <div class="col-3">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{object.email}}</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mt-3 mb-4 text-start m-3">
+                        <li>Фамилия: {{object.last_name}}</li>
+                        <li>Имя: {{object.first_name}}</li>
+                        <li>Отчество: {{object.middle_name}}</li>
+                        <li>Комментарий: {{object.comment}}</li>
+                    </ul>
+<!--                    {% if "library.can_recommend_book" in perms %}-->
+<!--                    <form action="{% url 'catalog:product_unpublish' product.id %}" method="post">-->
+<!--                    {% csrf_token %}-->
+<!--                    <button type="submit">Опубликовать</button>-->
+<!--                    </form>-->
+<!--                    {% endif %}-->
+                    <div class="btn-group">
+                    <a class="btn btn-primary" href="{% url 'mailing:recipient_list' %}" role='button'>Назад</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
